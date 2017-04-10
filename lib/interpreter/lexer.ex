@@ -25,12 +25,26 @@ defmodule Interpreter.Lexer do
   def get_next_token(%Interpreter{current_char: "+"} = interp) do
     interp
     |> advance()
-    |> (fn(i) -> %{i | current_token: Token.token(:plus, "+")} end).()
+    |> update_with_token(:plus, "+")
   end
   def get_next_token(%Interpreter{current_char: "-"} = interp) do
     interp
     |> advance()
-    |> (fn(i) -> %{i | current_token: Token.token(:minus, "-")} end).()
+    |> update_with_token(:minus, "-")
+  end
+  def get_next_token(%Interpreter{current_char: "*"} = interp) do
+    interp
+    |> advance()
+    |> update_with_token(:mul, "*")
+  end
+  def get_next_token(%Interpreter{current_char: "/"} = interp) do
+    interp
+    |> advance()
+    |> update_with_token(:div, "/")
+  end
+
+  defp update_with_token(interp, type, value) when is_atom(type) do
+    %{interp | current_token: Token.token(type, value)}
   end
 
   defp integer(interp, int_res \\ "")
