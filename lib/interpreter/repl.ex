@@ -4,12 +4,17 @@ defmodule Interpreter.Repl do
   @prompt "calc>> "
 
   def loop do
-    @prompt
-    |> IO.gets
-    |> Interpreter.interpreter
-    |> Interpreter.expr
-    |> IO.puts
+    case IO.gets @prompt do
+      i when i in ["\n", "\r\n"] ->
+        IO.puts "Goodbye"
+        :ok
+      input ->
+        input
+        |> Interpreter.interpreter()
+        |> Interpreter.expr()
+        |> IO.puts
 
-    loop()
+        loop()
+    end
   end
 end
