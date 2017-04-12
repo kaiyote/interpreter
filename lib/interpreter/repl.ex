@@ -19,5 +19,5 @@ defmodule Interpreter.Repl do
     end
   end
 
-  defp fst({a, b}), do: a
+  defp fst({a, _}), do: a
 end

@@ -1,5 +1,6 @@
 defmodule Mix.Tasks.Repl do
   @moduledoc false
+
   use Mix.Task
 
   alias Interpreter.Repl

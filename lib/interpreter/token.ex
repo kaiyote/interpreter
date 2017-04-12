@@ -1,12 +1,15 @@
 defmodule Interpreter.Token do
   @moduledoc false
+
   alias Interpreter.Token
+
+  @valid_token_types [:integer, :plus, :minus, :mul, :div, :lparen, :rparen, :eof]
 
   defstruct [:type, :value]
 
   defmacrop is_valid_type(a) do
     quote do
-      unquote(a) in ~w(integer plus minus mul div lparen rparen eof)a
+      unquote(a) in @valid_token_types
     end
   end
 

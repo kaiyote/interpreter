@@ -1,5 +1,6 @@
 defmodule Interpreter do
   @moduledoc false
+
   alias Interpreter.{Lexer, Token}
 
   defstruct text: nil, pos: 0, current_token: nil, current_char: nil
