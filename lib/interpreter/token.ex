@@ -1,20 +1,32 @@
 defmodule Interpreter.Token do
   @moduledoc false
 
-  alias Interpreter.Token
+  @typedoc "The valid token type atoms"
+  @type token_type :: :integer | :plus | :minus | :mul | :div | :lparen | :rparen | :eof
 
-  @valid_token_types [:integer, :plus, :minus, :mul, :div, :lparen, :rparen, :eof]
+  @typedoc "The `Token` Struct type"
+  @type t :: %__MODULE__{
+    type: token_type | nil,
+    value: any
+  }
 
   defstruct [:type, :value]
 
-  defmacrop is_valid_type(a) do
-    quote do
-      unquote(a) in @valid_token_types
-    end
-  end
+  @doc ~S"""
+  Given a valid token type, and a value, returns a %Token{}.
+  Will return an empty struct if given an invalid :type
 
-  def token(type, value) when is_valid_type(type) do
-    %Token{type: type, value: value}
+  Examples:
+
+      iex> Interpreter.Token.token :integer, 3
+      %Interpreter.Token{type: :integer, value: 3}
+
+      iex> Interpreter.Token.token :plus, "+"
+      %Interpreter.Token{type: :plus, value: "+"}
+  """
+  @spec token(token_type, any) :: t
+  def token(type, value) do
+    %__MODULE__{type: type, value: value}
   end
 end
 
