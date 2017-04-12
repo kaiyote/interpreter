@@ -4,7 +4,13 @@ defmodule Interpreter.Token do
 
   defstruct [:type, :value]
 
-  def token(type, value) when is_atom(type) do
+  defmacrop is_valid_type(a) do
+    quote do
+      unquote(a) in ~w(integer plus minus mul div lparen rparen eof)a
+    end
+  end
+
+  def token(type, value) when is_valid_type(type) do
     %Token{type: type, value: value}
   end
 end

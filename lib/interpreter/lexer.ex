@@ -3,16 +3,24 @@ defmodule Interpreter.Lexer do
 
   alias Interpreter.Token
 
-  defmacro is_digit(s) do
+  defmacrop is_digit(s) do
     quote do
       unquote(s) in ~w(0 1 2 3 4 5 6 7 8 9)
+    end
+  end
+
+  defmacrop is_whitespace(s) do
+    quote do
+      unquote(s) in [" ", "\t", "\n", "\r"]
     end
   end
 
   def get_next_token(%Interpreter{current_char: nil} = interp) do
     %{interp | current_token: Token.token(:eof, nil)}
   end
-  def get_next_token(%Interpreter{current_char: " "} = interp) do
+  def get_next_token(%Interpreter{current_char: c} = interp)
+    when is_whitespace(c) do
+
     interp
     |> skip_whitespace()
     |> get_next_token()
@@ -42,6 +50,16 @@ defmodule Interpreter.Lexer do
     |> advance()
     |> update_with_token(:div, "/")
   end
+  def get_next_token(%Interpreter{current_char: "("} = interp) do
+    interp
+    |> advance()
+    |> update_with_token(:lparen, "(")
+  end
+  def get_next_token(%Interpreter{current_char: ")"} = interp) do
+    interp
+    |> advance()
+    |> update_with_token(:rparen, ")")
+  end
 
   defp update_with_token(interp, type, value) when is_atom(type) do
     %{interp | current_token: Token.token(type, value)}
@@ -60,7 +78,9 @@ defmodule Interpreter.Lexer do
     %{interp | current_token: Token.token(:integer, int_val)}
   end
 
-  defp skip_whitespace(%Interpreter{current_char: " "} = interp) do
+  defp skip_whitespace(%Interpreter{current_char: c} = interp)
+    when is_whitespace(c) do
+
     interp
     |> advance()
     |> skip_whitespace()
@@ -69,9 +89,6 @@ defmodule Interpreter.Lexer do
 
   defp advance(%Interpreter{text: text, pos: pos} = interp) do
     new_pos = pos + 1
-    case String.at text, new_pos do
-      nil -> %{interp | current_char: nil}
-      c -> %{interp | pos: new_pos, current_char: c}
-    end
+    %{interp | pos: new_pos, current_char: String.at(text, new_pos)}
   end
 end

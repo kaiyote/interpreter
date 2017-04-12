@@ -7,50 +7,55 @@ defmodule Interpreter do
   def interpreter(input) do
     trimmed = String.trim input
     first_char = String.at trimmed, 0
-    %Interpreter{text: trimmed, current_char: first_char}
+    Lexer.get_next_token %Interpreter{text: trimmed, current_char: first_char}
   end
 
   def expr(interp, result \\ nil)
-  def expr(%{current_token: %{type: :eof}}, result) do
-    result
-  end
   def expr(%{current_token: %{type: :plus}} = interp, result) do
     interp = eat interp, :plus
-    {res, interp} = term interp
-    expr(interp, result + res)
+    {right_side, interp} = term interp
+    expr(interp, result + right_side)
   end
   def expr(%{current_token: %{type: :minus}} = interp, result) do
     interp = eat interp, :minus
-    {res, interp} = term interp
-    expr(interp, result - res)
+    {right_side, interp} = term interp
+    expr(interp, result - right_side)
   end
   def expr(interp, nil) do
-    interp = Lexer.get_next_token interp
-
     {result, interp} = term interp
     expr interp, result
   end
-
-  defp factor(%Interpreter{current_token: token} = interp) do
-    {token.value, eat(interp, :integer)}
+  def expr(interp, result) do
+    {result, interp}
   end
 
   defp term(interp, result \\ nil)
-  defp term(%Interpreter{current_token: %{type: :mul}} = interp, result) do
+  defp term(%{current_token: %{type: :mul}} = interp, result) do
     interp = eat interp, :mul
-    {res, interp} = factor interp
-    term(interp, result * res)
+    {right_side, interp} = factor interp
+    term(interp, result * right_side)
   end
-  defp term(%Interpreter{current_token: %{type: :div}} = interp, result) do
+  defp term(%{current_token: %{type: :div}} = interp, result) do
     interp = eat interp, :div
-    {res, interp} = factor interp
-    term(interp, result / res)
+    {right_side, interp} = factor interp
+    term(interp, result / right_side)
   end
-  defp term(%Interpreter{current_token: token} = interp, nil) do
-    {res, interp} = factor interp
-    term(interp, res)
+  defp term(interp, nil) do
+    {result, interp} = factor interp
+    term interp, result
   end
   defp term(interp, result) do
+    {result, interp}
+  end
+
+  defp factor(%{current_token: %{type: :integer} = token} = interp) do
+    interp = eat interp, :integer
+    {token.value, interp}
+  end
+  defp factor(%{current_token: %{type: :lparen}} = interp) do
+    interp = eat interp, :lparen
+    {result, interp} = expr interp
+    interp = eat interp, :rparen
     {result, interp}
   end
 

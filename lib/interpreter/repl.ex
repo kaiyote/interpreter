@@ -12,9 +12,12 @@ defmodule Interpreter.Repl do
         input
         |> Interpreter.interpreter()
         |> Interpreter.expr()
-        |> IO.puts
+        |> fst()
+        |> IO.puts()
 
         loop()
     end
   end
+
+  defp fst({a, b}), do: a
 end
