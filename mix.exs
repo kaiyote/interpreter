@@ -10,8 +10,7 @@ defmodule Interpreter.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps(),
-     dialyzer: [paths: ["_build/dev/lib/interpreter/ebin"],
-                plt_add_apps: [:mix]]
+     dialyzer: [plt_add_apps: [:mix]]
     ]
   end
 
