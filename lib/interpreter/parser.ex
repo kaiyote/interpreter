@@ -1,5 +1,5 @@
 defmodule Interpreter.Parser do
-  @moduledoc false
+  @moduledoc "The `Parser`. Turns a source string into an `Abstract Syntax Tree`"
 
   alias Interpreter.{Token, Lexer}
   alias Interpreter.Node.{Num, BinOp}

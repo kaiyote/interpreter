@@ -1,5 +1,5 @@
 defmodule Interpreter.Lexer do
-  @moduledoc false
+  @moduledoc "The `Lexer`. Turns a source string into a stream of `Token`s"
 
   alias Interpreter.Token
 
@@ -27,6 +27,7 @@ defmodule Interpreter.Lexer do
   @doc ~S"""
   Takes in a `Lexer`, and returns a tuple of the next `Token` and the updated `Lexer`
   It also handles skipping whitespace.
+
   Examples:
 
       iex> lexer = %Interpreter.Lexer{text: "1    +", pos: 1, current_char: " "}

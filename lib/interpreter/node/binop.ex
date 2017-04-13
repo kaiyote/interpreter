@@ -1,5 +1,5 @@
 defmodule Interpreter.Node.BinOp do
-  @moduledoc false
+  @moduledoc "A node with two children and an operation to perform using them"
 
   alias Interpreter.Token
   alias Interpreter.Node.Num

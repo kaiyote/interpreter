@@ -1,5 +1,5 @@
 defmodule Interpreter.Node.Num do
-  @moduledoc false
+  @moduledoc "A node that just contains a number"
 
   alias Interpreter.{Token}
 

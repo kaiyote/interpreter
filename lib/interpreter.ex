@@ -1,5 +1,5 @@
 defmodule Interpreter do
-  @moduledoc false
+  @moduledoc "The main module. Pass a string to `Interpreter.interpret` to get the result"
 
   alias Interpreter.Parser
   alias Interpreter.Node.BinOp

@@ -1,5 +1,5 @@
 defmodule Interpreter.Token do
-  @moduledoc false
+  @moduledoc "The `Token` struct. Holds the type of token, and its value"
 
   @typedoc "The valid token type atoms"
   @type token_type :: :integer | :plus | :minus | :mul | :div | :lparen | :rparen | :eof
