@@ -5,11 +5,10 @@ defmodule Interpreter.Node.Num do
 
   @typedoc "The `Num` AST node"
   @type t :: %__MODULE__{
-    token: Token.t | nil,
-    value: integer
+    value: number
   }
 
-  defstruct [:token, :value]
+  defstruct [:value]
 
   @doc ~S"""
   Given a `Token` with type `:integer`, returns a `Num` node
@@ -17,11 +16,17 @@ defmodule Interpreter.Node.Num do
   Example:
 
       iex> Interpreter.Node.Num.num(Interpreter.Token.token :integer, 4)
-      %Interpreter.Node.Num{token: %Interpreter.Token{type: :integer, value: 4}, value: 4}
+      %Interpreter.Node.Num{value: 4}
+
+      iex> Interpreter.Node.Num.num(4)
+      %Interpreter.Node.Num{value: 4}
   """
-  @spec num(Token.t) :: t
-  def num(%{type: :integer, value: val} = token) do
-    %__MODULE__{token: token, value: val}
+  @spec num(Token.t | number) :: t
+  def num(%{type: :integer, value: val}) do
+    %__MODULE__{value: val}
+  end
+  def num(num) when is_number(num) do
+    %__MODULE__{value: num}
   end
 end
 

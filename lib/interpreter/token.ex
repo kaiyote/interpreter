@@ -2,7 +2,8 @@ defmodule Interpreter.Token do
   @moduledoc "The `Token` struct. Holds the type of token, and its value"
 
   @typedoc "The valid token type atoms"
-  @type token_type :: :integer | :plus | :minus | :mul | :div | :lparen | :rparen | :eof
+  @type token_type :: :integer | :plus | :minus | :mul | :div | :lparen | :rparen | :eof | :begin |
+                      :end | :id | :assign | :semi | :dot
 
   @typedoc "The `Token` Struct type"
   @type t :: %__MODULE__{
