@@ -65,6 +65,7 @@ defmodule Interpreter.Lexer do
   @spec get_next_token(t | String.t) :: {Token.t, t}
   def get_next_token(input) when is_binary(input) do
     input
+    |> String.downcase()
     |> lexer
     |> get_next_token()
   end

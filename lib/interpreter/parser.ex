@@ -17,9 +17,9 @@ defmodule Interpreter.Parser do
 
   Example:
 
-      iex> tree = Interpreter.Parser.parse "1 - 1"
+      iex> tree = Interpreter.Parser.parse "begin end."
       iex> to_string tree
-      "%BinOp{%Num{1} - %Num{1}}"
+      "%Compound[,\n]"
   """
   @spec parse(t | String.t) :: Node.t
   def parse(input) when is_binary(input) do
@@ -28,7 +28,12 @@ defmodule Interpreter.Parser do
     |> parse()
   end
   def parse(parser) do
-    {tree, _} = expr parser
+    {tree, parser} = program parser
+    finish_parse parser, tree
+  end
+
+  @spec finish_parse(t, Compound.t) :: Compound.t
+  defp finish_parse(%{current_token: %{type: type}}, tree) when type == :eof do
     tree
   end
 
@@ -74,7 +79,7 @@ defmodule Interpreter.Parser do
 
     statement_list parser, [node | statements]
   end
-  defp statement_list(%{current_token: %{type: type}} = parser, []) when type != :id do
+  defp statement_list(parser, []) do
     {node, parser} = statement parser
     statement_list parser, [node]
   end
@@ -93,8 +98,9 @@ defmodule Interpreter.Parser do
 
   @spec program(t) :: {Compound.t, t}
   defp program(parser) do
-    node = compound_statement parser
-    {node, eat(parser, :dot)}
+    {node, parser} = compound_statement parser
+    parser = eat parser, :dot
+    {node, parser}
   end
 
   @spec expr(t, Node.t | nil) :: {Node.t, t}
@@ -147,6 +153,9 @@ defmodule Interpreter.Parser do
     {node, parser} = expr parser
     parser = eat parser, :rparen
     {node, parser}
+  end
+  defp factor(parser) do
+    variable parser
   end
 
   @spec eat(t, Token.token_type) :: t
