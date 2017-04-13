@@ -10,14 +10,10 @@ defmodule Interpreter.Repl do
         :ok
       input ->
         input
-        |> Interpreter.interpreter()
-        |> Interpreter.expr()
-        |> fst()
+        |> Interpreter.interpret()
         |> IO.puts()
 
         loop()
     end
   end
-
-  defp fst({a, _}), do: a
 end

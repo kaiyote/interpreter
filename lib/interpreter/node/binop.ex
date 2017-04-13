@@ -26,7 +26,7 @@ defmodule Interpreter.Node.BinOp do
       iex> op = Interpreter.Token.token :plus, "+"
       iex> binop = Interpreter.Node.BinOp.binop right, op, left
       iex> to_string binop
-      "%BinOp{1 + 1}"
+      "%BinOp{%Num{1} + %Num{1}}"
   """
   @spec binop(node_type, Token.t, node_type) :: t
   def binop(left, op, right) do
@@ -36,6 +36,6 @@ end
 
 defimpl String.Chars, for: Interpreter.Node.BinOp do
   def to_string(binop) do
-    "%BinOp{#{binop.left.value} #{binop.op.value} #{binop.right.value}}"
+    "%BinOp{#{Kernel.to_string binop.left} #{binop.op.value} #{Kernel.to_string binop.right}}"
   end
 end
