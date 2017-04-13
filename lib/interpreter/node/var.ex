@@ -4,19 +4,14 @@ defmodule Interpreter.Node.Var do
 
   Example:
 
-    iex> to_string %Interpreter.Node.Var{name: "varName"}
-    "varName"
+    iex> %Interpreter.Node.Var{name: "varName"}
+    %Interpreter.Node.Var{name: "varName"}
+
+    iex> %Interpreter.Node.Var{}
+    %Interpreter.Node.Var{name: nil}
   """
 
-  @type t :: %__MODULE__{
-    name: String.t
-  }
+  @type t :: %__MODULE__{name: String.t}
 
   defstruct [:name]
-end
-
-defimpl String.Chars, for: Interpreter.Node.Var do
-  def to_string(%{name: name}) do
-    name
-  end
 end

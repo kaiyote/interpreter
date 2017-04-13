@@ -51,7 +51,7 @@ defmodule Interpreter do
   defp visit(%UnaryOp{op: %{type: :minus}, expr: expr}) do
     -visit(expr)
   end
-  defp visit(%Assign{ident: %{name: name}, val: val}) do
+  defp visit(%Assign{ident: %{name: name}, value: val}) do
     :ets.insert(@ets_table, {name, visit(val)})
   end
   defp visit(%Compound{children: children}) do

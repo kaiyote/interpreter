@@ -44,23 +44,19 @@ defmodule Interpreter.Lexer do
   Examples:
 
       iex> lexer = %Interpreter.Lexer{text: "1    +", pos: 1, current_char: " ", next_char: " "}
-      iex> {token, %{pos: x, current_char: c}} = Interpreter.Lexer.get_next_token lexer
-      iex> "#{to_string token}, #{x}, #{c}"
-      "%Token{plus, +}, 6, "
+      iex> Interpreter.Lexer.get_next_token lexer
+      {%Interpreter.Token{type: :plus, value: nil}, %Interpreter.Lexer{current_char: nil, next_char: nil, pos: 6, text: "1    +"}}
 
       iex> lexer = %Interpreter.Lexer{text: "42", pos: 0, current_char: "4", next_char: "2"}
-      iex> {token, %{pos: x, current_char: c}} = Interpreter.Lexer.get_next_token lexer
-      iex> "#{to_string token}, #{x}, #{c}"
-      "%Token{integer, 42}, 2, "
+      iex> Interpreter.Lexer.get_next_token lexer
+      {%Interpreter.Token{type: :integer, value: 42}, %Interpreter.Lexer{current_char: nil, next_char: nil, pos: 2, text: "42"}}
 
       iex> lexer = %Interpreter.Lexer{text: "42 -24", pos: 2, current_char: " ", next_char: "-"}
-      iex> {token, %{pos: x, current_char: c}} = Interpreter.Lexer.get_next_token lexer
-      iex> "#{to_string token}, #{x}, #{c}"
-      "%Token{minus, -}, 4, 2"
+      iex> Interpreter.Lexer.get_next_token lexer
+      {%Interpreter.Token{type: :minus, value: nil}, %Interpreter.Lexer{current_char: "2", next_char: "4", pos: 4, text: "42 -24"}}
 
-      iex> {token, %{pos: x, current_char: c}} = Interpreter.Lexer.get_next_token "4 - 2"
-      iex> "#{to_string token}, #{x}, #{c}"
-      "%Token{integer, 4}, 1,  "
+      iex> Interpreter.Lexer.get_next_token "4 - 2"
+      {%Interpreter.Token{type: :integer, value: 4}, %Interpreter.Lexer{current_char: " ", next_char: "-", pos: 1, text: "4 - 2"}}
   """
   @spec get_next_token(t | String.t) :: {Token.t, t}
   def get_next_token(input) when is_binary(input) do
@@ -70,7 +66,7 @@ defmodule Interpreter.Lexer do
     |> get_next_token()
   end
   def get_next_token(%{current_char: nil} = lexer) do
-    {Token.token(:eof, nil), lexer}
+    {%Token{type: :eof}, lexer}
   end
   def get_next_token(%{current_char: c} = lexer) when is_whitespace(c) do
     lexer
@@ -84,16 +80,10 @@ defmodule Interpreter.Lexer do
     id lexer
   end
   def get_next_token(%{current_char: ":", next_char: "="} = lexer) do
-    {Token.token(:assign, ":="), lexer |> advance() |> advance()}
-  end
-  def get_next_token(%{current_char: ";"} = lexer) do
-    {Token.token(:semi, ";"), advance lexer}
-  end
-  def get_next_token(%{current_char: "."} = lexer) do
-    {Token.token(:dot, "."), advance lexer}
+    {%Token{type: :assign}, lexer |> advance() |> advance()}
   end
   def get_next_token(%{current_char: c} = lexer) do
-    {c |> convert_char_to_atom() |> Token.token(c), advance lexer}
+    {%Token{type: convert_char_to_atom(c)}, advance lexer}
   end
 
   @spec lexer(String.t) :: t
@@ -111,13 +101,9 @@ defmodule Interpreter.Lexer do
     |> advance()
     |> id(id_part <> c)
   end
-  defp id(lexer, id_part) do
-    case String.downcase id_part do
-      "begin" -> {Token.token(:begin, "BEGIN"), lexer}
-      "end" -> {Token.token(:end, "END"), lexer}
-      _ -> {Token.token(:id, id_part), lexer}
-    end
-  end
+  defp id(lexer, "begin"), do: {%Token{type: :begin}, lexer}
+  defp id(lexer, "end"), do: {%Token{type: :end}, lexer}
+  defp id(lexer, id_part), do: {%Token{type: :id, value: id_part}, lexer}
 
   @spec integer(t, String.t) :: {Token.t, t}
   defp integer(lexer, int_res \\ "")
@@ -128,20 +114,18 @@ defmodule Interpreter.Lexer do
   end
   defp integer(lexer, int_res) do
     int_val = String.to_integer int_res
-    {Token.token(:integer, int_val), lexer}
+    {%Token{type: :integer, value: int_val}, lexer}
   end
 
   @spec convert_char_to_atom(String.t) :: Token.token_type
-  defp convert_char_to_atom(char) when char in ~w|+ - * / ( )| do
-    case char do
-      "+" -> :plus
-      "-" -> :minus
-      "*" -> :mul
-      "/" -> :div
-      "(" -> :lparen
-      ")" -> :rparen
-    end
-  end
+  defp convert_char_to_atom("+"), do: :plus
+  defp convert_char_to_atom("-"), do: :minus
+  defp convert_char_to_atom("*"), do: :mul
+  defp convert_char_to_atom("/"), do: :div
+  defp convert_char_to_atom("("), do: :lparen
+  defp convert_char_to_atom(")"), do: :rparen
+  defp convert_char_to_atom(";"), do: :semi
+  defp convert_char_to_atom("."), do: :dot
 
   @spec skip_whitespace(t) :: t
   defp skip_whitespace(%{current_char: c} = lexer) when is_whitespace(c) do
