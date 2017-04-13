@@ -1,11 +1,8 @@
 defmodule Interpreter.Parser do
   @moduledoc "The `Parser`. Turns a source string into an `Abstract Syntax Tree`"
 
-  alias Interpreter.{Token, Lexer}
-  alias Interpreter.Node.{Num, BinOp}
-
-  @typedoc "The possible types of Nodes"
-  @type node_type :: Num.t | BinOp.t
+  alias Interpreter.{Token, Lexer, Node}
+  alias Interpreter.Node.{BinOp, Num, UnaryOp}
 
   @typedoc "The `Parser` Struct"
   @type t :: %__MODULE__{
@@ -24,7 +21,7 @@ defmodule Interpreter.Parser do
       iex> to_string tree
       "%BinOp{%Num{1} - %Num{1}}"
   """
-  @spec parse(t | String.t) :: node_type
+  @spec parse(t | String.t) :: Node.t
   def parse(input) when is_binary(input) do
     input
     |> parser()
@@ -41,12 +38,15 @@ defmodule Interpreter.Parser do
     %__MODULE__{lexer: lexer, current_token: token}
   end
 
-  @spec expr(t, node_type | nil) :: {node_type, t}
+  @spec expr(t, Node.t | nil) :: {Node.t, t}
   defp expr(parser, tree \\ nil)
+  defp expr(%{current_token: %{type: type} = op} = parser, nil) when type in ~w(plus minus)a do
+    factor parser
+  end
   defp expr(%{current_token: %{type: type} = op} = parser, tree) when type in ~w(plus minus)a do
     parser = eat parser, type
     {right, parser} = term parser
-    tree = BinOp.binop tree, op, right
+    tree = BinOp.bin_op tree, op, right
     expr parser, tree
   end
   defp expr(parser, nil) do
@@ -57,12 +57,12 @@ defmodule Interpreter.Parser do
     {tree, parser}
   end
 
-  @spec term(t, node_type | nil) :: {node_type, t}
+  @spec term(t, Node.t | nil) :: {Node.t, t}
   defp term(parser, left \\ nil)
   defp term(%{current_token: %{type: type} = op} = parser, left) when type in ~w(mul div)a do
     parser = eat parser, type
     {right, parser} = factor parser
-    node = BinOp.binop left, op, right
+    node = BinOp.bin_op left, op, right
     term parser, node
   end
   defp term(parser, nil) do
@@ -73,7 +73,12 @@ defmodule Interpreter.Parser do
     {left, parser}
   end
 
-  @spec factor(t) :: {node_type, t}
+  @spec factor(t) :: {Node.t, t}
+  defp factor(%{current_token: %{type: type} = token} = parser) when type in ~w(plus minus)a do
+    parser = eat parser, type
+    {expr, parser} = factor parser
+    {UnaryOp.unary_op(token, expr), parser}
+  end
   defp factor(%{current_token: %{type: :integer} = token} = parser) do
     parser = eat parser, :integer
     {Num.num(token), parser}

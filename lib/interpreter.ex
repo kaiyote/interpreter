@@ -2,7 +2,7 @@ defmodule Interpreter do
   @moduledoc "The main module. Pass a string to `Interpreter.interpret` to get the result"
 
   alias Interpreter.Parser
-  alias Interpreter.Node.BinOp
+  alias Interpreter.Node
 
   @doc ~S"""
   Given a source string, computes the arithmetic for it
@@ -17,6 +17,18 @@ defmodule Interpreter do
 
       iex> Interpreter.interpret "7 + (((3 + 2)))"
       12
+
+      iex> Interpreter.interpret "- 3"
+      -3
+
+      iex> Interpreter.interpret "+ 3"
+      3
+
+      iex> Interpreter.interpret "5 - - - + - 3"
+      8
+
+      iex> Interpreter.interpret "5 - - - + - (3 + 4) - +2"
+      10
   """
   @spec interpret(String.t) :: any
   def interpret(input) do
@@ -25,7 +37,7 @@ defmodule Interpreter do
     |> visit()
   end
 
-  @spec visit(BinOp.node_type) :: any
+  @spec visit(Node.t) :: any
   defp visit(%{value: val}), do: val
   defp visit(%{left: left, op: %{type: :plus}, right: right}) do
     visit(left) + visit(right)
@@ -38,5 +50,11 @@ defmodule Interpreter do
   end
   defp visit(%{left: left, op: %{type: :div}, right: right}) do
     visit(left) / visit(right)
+  end
+  defp visit(%{op: %{type: :plus}, expr: expr}) do
+    +visit(expr)
+  end
+  defp visit(%{op: %{type: :minus}, expr: expr}) do
+    -visit(expr)
   end
 end

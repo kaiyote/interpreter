@@ -2,16 +2,13 @@ defmodule Interpreter.Node.BinOp do
   @moduledoc "A node with two children and an operation to perform using them"
 
   alias Interpreter.Token
-  alias Interpreter.Node.Num
-
-  @typedoc "The allowable types of child nodes on a BinOp"
-  @type node_type :: t | Num.t
+  alias Interpreter.Node
 
   @typedoc "The `BinOp` AST node"
   @type t :: %__MODULE__{
-    left: node_type,
+    left: Node.t,
     op: Token.t,
-    right: node_type
+    right: Node.t
   }
 
   defstruct [:left, :op, :right]
@@ -24,12 +21,12 @@ defmodule Interpreter.Node.BinOp do
       iex> right = Interpreter.Node.Num.num(Interpreter.Token.token :integer, 1)
       iex> left = Interpreter.Node.Num.num(Interpreter.Token.token :integer, 1)
       iex> op = Interpreter.Token.token :plus, "+"
-      iex> binop = Interpreter.Node.BinOp.binop right, op, left
+      iex> binop = Interpreter.Node.BinOp.bin_op right, op, left
       iex> to_string binop
       "%BinOp{%Num{1} + %Num{1}}"
   """
-  @spec binop(node_type, Token.t, node_type) :: t
-  def binop(left, op, right) do
+  @spec bin_op(Node.t, Token.t, Node.t) :: t
+  def bin_op(left, op, right) do
     %__MODULE__{left: left, op: op, right: right}
   end
 end
