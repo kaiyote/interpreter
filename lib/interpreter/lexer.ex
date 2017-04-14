@@ -49,14 +49,20 @@ defmodule Interpreter.Lexer do
 
       iex> lexer = %Interpreter.Lexer{text: "42", pos: 0, current_char: "4", next_char: "2"}
       iex> Interpreter.Lexer.get_next_token lexer
-      {%Interpreter.Token{type: :integer, value: 42}, %Interpreter.Lexer{current_char: nil, next_char: nil, pos: 2, text: "42"}}
+      {%Interpreter.Token{type: :integer_const, value: 42}, %Interpreter.Lexer{current_char: nil, next_char: nil, pos: 2, text: "42"}}
 
       iex> lexer = %Interpreter.Lexer{text: "42 -24", pos: 2, current_char: " ", next_char: "-"}
       iex> Interpreter.Lexer.get_next_token lexer
       {%Interpreter.Token{type: :minus, value: nil}, %Interpreter.Lexer{current_char: "2", next_char: "4", pos: 4, text: "42 -24"}}
 
       iex> Interpreter.Lexer.get_next_token "4 - 2"
-      {%Interpreter.Token{type: :integer, value: 4}, %Interpreter.Lexer{current_char: " ", next_char: "-", pos: 1, text: "4 - 2"}}
+      {%Interpreter.Token{type: :integer_const, value: 4}, %Interpreter.Lexer{current_char: " ", next_char: "-", pos: 1, text: "4 - 2"}}
+
+      iex> Interpreter.Lexer.get_next_token "3.14 - 1"
+      {%Interpreter.Token{type: :real_const, value: 3.14}, %Interpreter.Lexer{current_char: " ", next_char: "-", pos: 4, text: "3.14 - 1"}}
+
+      iex> Interpreter.Lexer.get_next_token "{this is a comment} 3.14 - 1"
+      {%Interpreter.Token{type: :real_const, value: 3.14}, %Interpreter.Lexer{current_char: " ", next_char: "-", pos: 24, text: "{this is a comment} 3.14 - 1"}}
   """
   @spec get_next_token(t | String.t) :: {Token.t, t}
   def get_next_token(input) when is_binary(input) do
@@ -73,8 +79,13 @@ defmodule Interpreter.Lexer do
     |> skip_whitespace()
     |> get_next_token()
   end
+  def get_next_token(%{current_char: "{"} = lexer) do
+    lexer
+    |> skip_comment()
+    |> get_next_token()
+  end
   def get_next_token(%{current_char: c} = lexer) when is_digit(c) do
-    integer lexer
+    number lexer
   end
   def get_next_token(%{current_char: c} = lexer) when is_alpha(c) do
     id lexer
@@ -103,29 +114,48 @@ defmodule Interpreter.Lexer do
   end
   defp id(lexer, "begin"), do: {%Token{type: :begin}, lexer}
   defp id(lexer, "end"), do: {%Token{type: :end}, lexer}
+  defp id(lexer, "program"), do: {%Token{type: :program}, lexer}
+  defp id(lexer, "var"), do: {%Token{type: :var}, lexer}
+  defp id(lexer, "div"), do: {%Token{type: :integer_div}, lexer}
+  defp id(lexer, "integer"), do: {%Token{type: :integer}, lexer}
+  defp id(lexer, "real"), do: {%Token{type: :real}, lexer}
   defp id(lexer, id_part), do: {%Token{type: :id, value: id_part}, lexer}
 
-  @spec integer(t, String.t) :: {Token.t, t}
-  defp integer(lexer, int_res \\ "")
-  defp integer(%{current_char: c} = lexer, int_res) when is_digit(c) do
+  @spec number(t, String.t) :: {Token.t, t}
+  defp number(lexer, int_res \\ "")
+  defp number(%{current_char: c} = lexer, int_res) when is_digit(c) do
     lexer
     |> advance()
-    |> integer(int_res <> c)
+    |> number(int_res <> c)
   end
-  defp integer(lexer, int_res) do
-    int_val = String.to_integer int_res
-    {%Token{type: :integer, value: int_val}, lexer}
+  defp number(%{current_char: "."} = lexer, int_res) do
+    unless String.contains? int_res, "." do
+      lexer
+      |> advance()
+      |> number(int_res <> ".")
+    end
+  end
+  defp number(lexer, int_res) do
+    if String.contains? int_res, "." do
+      real_val = String.to_float int_res
+      {%Token{type: :real_const, value: real_val}, lexer}
+    else
+      int_val = String.to_integer int_res
+      {%Token{type: :integer_const, value: int_val}, lexer}
+    end
   end
 
   @spec convert_char_to_atom(String.t) :: Token.token_type
   defp convert_char_to_atom("+"), do: :plus
   defp convert_char_to_atom("-"), do: :minus
   defp convert_char_to_atom("*"), do: :mul
-  defp convert_char_to_atom("/"), do: :div
+  defp convert_char_to_atom("/"), do: :float_div
   defp convert_char_to_atom("("), do: :lparen
   defp convert_char_to_atom(")"), do: :rparen
   defp convert_char_to_atom(";"), do: :semi
   defp convert_char_to_atom("."), do: :dot
+  defp convert_char_to_atom(":"), do: :colon
+  defp convert_char_to_atom(","), do: :comma
 
   @spec skip_whitespace(t) :: t
   defp skip_whitespace(%{current_char: c} = lexer) when is_whitespace(c) do
@@ -134,6 +164,17 @@ defmodule Interpreter.Lexer do
     |> skip_whitespace()
   end
   defp skip_whitespace(lexer), do: lexer
+
+  @spec skip_comment(t) :: t
+  defp skip_comment(%{current_char: c} = lexer) when c != "}" do
+    lexer
+    |> advance()
+    |> skip_comment()
+  end
+  defp skip_comment(%{current_char: "}"} = lexer) do
+    lexer
+    |> advance()
+  end
 
   @spec advance(t) :: t
   defp advance(%{text: text, pos: pos} = lexer) do
