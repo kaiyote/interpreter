@@ -14,7 +14,7 @@ defmodule Interpreter.Node.BinOp do
   @typedoc "The `BinOp` AST node"
   @type t :: %__MODULE__{
     left: Node.t,
-    op: :plus | :minus | :div | :mul,
+    op: :plus | :minus | :integer_div | :float_div | :mul,
     right: Node.t
   }
 

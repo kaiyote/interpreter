@@ -9,9 +9,9 @@ defmodule Interpreter.Token do
   """
 
   @typedoc "The valid token type atoms"
-  @type token_type :: :integer | :plus | :minus | :mul | :lparen | :rparen | :id | :assign |
-                      :begin | :end | :semi | :dot | :eof | :program | :var | :colon | :comma |
-                      :integer_const | :real_const | :integer_div | :float_div
+  @type token_type :: :assign | :begin | :colon | :comma | :dot | :end | :eof | :float_div | :id |
+                      :integer | :integer_const | :integer_div | :lparen | :minus | :mul | :plus |
+                      :program | :real | :real_const | :rparen | :semi | :var
 
   @typedoc "The `Token` Struct type"
   @type t :: %__MODULE__{
