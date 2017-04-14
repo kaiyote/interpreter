@@ -1,16 +1,9 @@
 defmodule Interpreter.Node.Block do
-  @moduledoc ~S"""
-  Contains variable declarations and the compound statement that makes up the body of the block.
-
-  Example:
-
-      iex> alias Interpreter.Node.{Block, Compound, Var, VarDecl, Type}
-      iex> %Block{}
-      %Interpreter.Node.Block{compound_statement: %Interpreter.Node.Compound{children: []}, declarations: []}
-  """
+  @moduledoc "Contains variable declarations and the compound statement that makes up the body of the block."
 
   alias Interpreter.Node.{Compound, VarDecl}
 
+  @typedoc "The `Block` struct"
   @type t :: %__MODULE__{
     declarations: [VarDecl.t],
     compound_statement: Compound.t

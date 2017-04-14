@@ -1,12 +1,5 @@
 defmodule Interpreter.Node.Program do
-  @moduledoc ~S"""
-  The root node for the pascal program.
-
-  Example:
-
-      iex> %Interpreter.Node.Program{}
-      %Interpreter.Node.Program{block: %Interpreter.Node.Block{compound_statement: %Interpreter.Node.Compound{children: []}, declarations: []}, name: "Program"}
-  """
+  @moduledoc "The root node for the pascal program."
 
   alias Interpreter.Node.Block
 

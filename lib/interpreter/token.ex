@@ -1,12 +1,5 @@
 defmodule Interpreter.Token do
-  @moduledoc """
-  The `Token` struct. Holds the type of token, and its value
-
-  Example:
-
-      iex> %Interpreter.Token{type: :integer, value: 8}
-      %Interpreter.Token{type: :integer, value: 8}
-  """
+  @moduledoc "The `Token` struct. Holds the type of token, and its value"
 
   @typedoc "The valid token type atoms"
   @type token_type :: :assign | :begin | :colon | :comma | :dot | :end | :eof | :float_div | :id |

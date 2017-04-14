@@ -5,17 +5,15 @@ defmodule Interpreter do
   alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, Type, UnaryOp, Var,
                           VarDecl}
 
-  @ets_table :global_scope
+  @ets_table :interpreter_global_scope
 
   @doc "Given a source string, interprets the AST generated from it"
   @spec interpret(String.t) :: any
   def interpret(input) do
-    try do
-      :ets.new @ets_table, [:set, :public, :named_table]
-    rescue
-      ArgumentError ->
-        :ets.delete @ets_table
-        :ets.new @ets_table, [:set, :public, :named_table]
+    if @ets_table in :ets.all do
+      :ets.delete_all_objects @ets_table
+    else
+      :ets.new @ets_table, [:ordered_set, :public, :named_table]
     end
 
     input
@@ -27,7 +25,7 @@ defmodule Interpreter do
 
   @spec visit(Node.t) :: any
   defp visit(%Assign{ident: %{name: name}, value: val}) do
-    :ets.insert(@ets_table, {name, visit(val)})
+    :ets.insert @ets_table, {name, visit(val)}
   end
   defp visit(%BinOp{left: left, op: :plus, right: right}) do
     visit(left) + visit(right)

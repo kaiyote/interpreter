@@ -1,13 +1,5 @@
 defmodule Interpreter.Node.VarDecl do
-  @moduledoc ~S"""
-  A variable declaration node
-
-  Examples:
-
-      iex> alias Interpreter.Node.{Var, VarDecl, Type}
-      iex> %VarDecl{var: %Var{name: "x"}, type: %Type{value: :real}}
-      %Interpreter.Node.VarDecl{type: %Interpreter.Node.Type{value: :real}, var: %Interpreter.Node.Var{name: "x"}}
-  """
+  @moduledoc "A variable declaration node"
 
   alias Interpreter.Node.{Type, Var}
 

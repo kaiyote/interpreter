@@ -29,6 +29,6 @@ defmodule InterpreterTest do
     END.  {Part10}
     "
     results = Interpreter.interpret test_prog
-    assert results == [{"x", 11}, {"b", 25}, {"number", 2}, {"c", 27}, {"y", 5.997142857142857}, {"a", 2}]
+    assert results == [{"a", 2}, {"b", 25}, {"c", 27}, {"number", 2}, {"x", 11}, {"y", 5.997142857142857}]
   end
 end

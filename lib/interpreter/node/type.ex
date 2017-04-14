@@ -1,12 +1,5 @@
 defmodule Interpreter.Node.Type do
-  @moduledoc ~S"""
-  A variable `type` AST node
-
-  Example:
-
-      iex> %Interpreter.Node.Type{value: :integer}
-      %Interpreter.Node.Type{value: :integer}
-  """
+  @moduledoc "A variable `type` AST node"
 
   @typedoc "The `Type` struct"
   @type t :: %__MODULE__{
