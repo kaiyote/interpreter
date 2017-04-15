@@ -46,6 +46,8 @@ defmodule Interpreter.SymbolTable do
   end
 
   @doc "Walks the Symbol tree, ensuring variables exist before assignment"
+  @spec visit(Assign.t | BinOp.t | Block.t | Compound.t | NVar.t | Program.t | UnaryOp.t |
+              VarDecl.t | Num.t | NoOp.t) :: any
   def visit(%Assign{ident: %{name: name}, value: value}) do
     case lookup name do
       nil -> raise "NameError(#{name})"
