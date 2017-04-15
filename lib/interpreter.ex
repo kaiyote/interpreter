@@ -2,8 +2,8 @@ defmodule Interpreter do
   @moduledoc "The main module. Pass a string to `Interpreter.interpret` to get the result"
 
   alias Interpreter.{Parser, Node, SymbolTable}
-  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, Type, UnaryOp, Var,
-                          VarDecl}
+  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, ProcedureDecl, Program, Type,
+                          UnaryOp, Var, VarDecl}
 
   @ets_table :interpreter_global_scope
 
@@ -49,8 +49,6 @@ defmodule Interpreter do
   defp visit(%Compound{children: children}) do
     for child <- children, do: visit(child)
   end
-  defp visit(%NoOp{}) do
-  end
   defp visit(%Num{value: val}) do
     val
   end
@@ -69,6 +67,10 @@ defmodule Interpreter do
     case :ets.lookup @ets_table, name do
       [{^name, value}] -> value
     end
+  end
+  defp visit(%NoOp{}) do
+  end
+  defp visit(%ProcedureDecl{}) do
   end
   defp visit(%VarDecl{}) do
   end

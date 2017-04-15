@@ -3,7 +3,8 @@ defmodule Interpreter.SymbolTable do
 
   alias Interpreter.Symbol
   alias Interpreter.Symbol.{BuiltInType, Var}
-  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, UnaryOp, VarDecl}
+  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, ProcedureDecl, Program,
+                          UnaryOp, VarDecl}
   alias Interpreter.Node.Var, as: NVar
 
   @ets_table :interpreter_symbol_table
@@ -46,8 +47,8 @@ defmodule Interpreter.SymbolTable do
   end
 
   @doc "Walks the Symbol tree, ensuring variables exist before assignment"
-  @spec visit(Assign.t | BinOp.t | Block.t | Compound.t | NVar.t | Program.t | UnaryOp.t |
-              VarDecl.t | Num.t | NoOp.t) :: any
+  @spec visit(Assign.t | BinOp.t | Block.t | Compound.t | NVar.t | ProcedureDecl.t | Program.t |
+              UnaryOp.t | VarDecl.t | Num.t | NoOp.t) :: any
   def visit(%Assign{ident: %{name: name}, value: value}) do
     case lookup name do
       nil -> raise "NameError(#{name})"
@@ -86,5 +87,7 @@ defmodule Interpreter.SymbolTable do
   def visit(%Num{}) do
   end
   def visit(%NoOp{}) do
+  end
+  def visit(%ProcedureDecl{}) do
   end
 end

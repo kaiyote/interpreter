@@ -2,8 +2,8 @@ defmodule Interpreter.Parser do
   @moduledoc "The `Parser`. Turns a source string into an `Abstract Syntax Tree`"
 
   alias Interpreter.{Token, Lexer, Node}
-  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, Type, UnaryOp, Var,
-                          VarDecl}
+  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, ProcedureDecl, Program, Type,
+                          UnaryOp, Var, VarDecl}
 
   @typedoc "The `Parser` Struct"
   @type t :: %__MODULE__{
@@ -83,6 +83,16 @@ defmodule Interpreter.Parser do
     parser = eat parser, :var
     declarations parser
   end
+  defp declarations(%{current_token: %{type: :procedure}} = parser, dec_list) do
+    parser = eat parser, :procedure
+    proc_name = parser.current_token.value
+    parser = parser
+      |> eat(:id)
+      |> eat(:semi)
+    {block_node, parser} = block parser
+    proc = %ProcedureDecl{name: proc_name, block: block_node}
+    declarations(eat(parser, :semi), dec_list ++ [proc])
+  end
   defp declarations(%{current_token: %{type: :id}} = parser, dec_list) do
     {var_decl, parser} = variable_declaration parser
     parser = eat parser, :semi
@@ -116,15 +126,15 @@ defmodule Interpreter.Parser do
 
   @spec statement_list(t, Node.statement_list) :: {Node.statement_list, t}
   defp statement_list(parser, statements \\ [])
+  defp statement_list(parser, []) do
+    {node, parser} = statement parser
+    statement_list parser, [node]
+  end
   defp statement_list(%{current_token: %{type: :semi}} = parser, statements) do
     {node, parser} = parser
       |> eat(:semi)
       |> statement()
     statement_list parser, [node | statements]
-  end
-  defp statement_list(parser, []) do
-    {node, parser} = statement parser
-    statement_list parser, [node]
   end
   defp statement_list(%{current_token: %{type: type}} = parser, statements) when type != :id do
     {Enum.reverse(statements), parser}
@@ -139,16 +149,16 @@ defmodule Interpreter.Parser do
 
   @spec variable_declaration(t, [Var.t]) :: {Node.declaration_list, t}
   defp variable_declaration(parser, dec_list \\ [])
+  defp variable_declaration(parser, []) do
+    nodes = [%Var{name: parser.current_token.value}]
+    parser = eat parser, :id
+    variable_declaration parser, nodes
+  end
   defp variable_declaration(%{current_token: %{type: :comma}} = parser, dec_list) do
     parser = eat parser, :comma
     var = %Var{name: parser.current_token.value}
     parser = eat parser, :id
     variable_declaration parser, [var | dec_list]
-  end
-  defp variable_declaration(parser, []) do
-    nodes = [%Var{name: parser.current_token.value}]
-    parser = eat parser, :id
-    variable_declaration parser, nodes
   end
   defp variable_declaration(parser, dec_list) do
     parser = eat parser, :colon
@@ -172,15 +182,15 @@ defmodule Interpreter.Parser do
   defp expr(%{current_token: %{type: type}} = parser, nil) when type in ~w(plus minus)a do
     factor parser
   end
+  defp expr(parser, nil) do
+    {node, parser} = term parser
+    expr parser, node
+  end
   defp expr(%{current_token: %{type: type}} = parser, tree) when type in ~w(plus minus)a do
     parser = eat parser, type
     {right, parser} = term parser
     tree = %BinOp{left: tree, op: type, right: right}
     expr parser, tree
-  end
-  defp expr(parser, nil) do
-    {node, parser} = term parser
-    expr parser, node
   end
   defp expr(parser, tree) do
     {tree, parser}

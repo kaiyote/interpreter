@@ -119,6 +119,7 @@ defmodule Interpreter.Lexer do
   defp id(lexer, "div"), do: {%Token{type: :integer_div}, lexer}
   defp id(lexer, "integer"), do: {%Token{type: :integer}, lexer}
   defp id(lexer, "real"), do: {%Token{type: :real}, lexer}
+  defp id(lexer, "procedure"), do: {%Token{type: :procedure}, lexer}
   defp id(lexer, id_part), do: {%Token{type: :id, value: id_part}, lexer}
 
   @spec number(t, String.t) :: {Token.t, t}

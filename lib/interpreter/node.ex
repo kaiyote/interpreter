@@ -1,12 +1,12 @@
 defmodule Interpreter.Node do
   @moduledoc "A module that contains various AST Node types"
 
-  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, Type, UnaryOp, Var,
-                          VarDecl}
+  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, ProcedureDecl, Program, Type,
+                          UnaryOp, Var, VarDecl}
 
   @typedoc "The various types of AST Nodes"
-  @type t :: Assign.t | BinOp.t | Block.t | Compound.t | NoOp.t | Num.t | Program.t | Type.t |
-             UnaryOp.t | Var.t | VarDecl.t
+  @type t :: Assign.t | BinOp.t | Block.t | Compound.t | NoOp.t | Num.t | ProcedureDecl.t |
+             Program.t | Type.t | UnaryOp.t | Var.t | VarDecl.t
 
   @typedoc "The types of Leaf nodes (have no children)"
   @type leaf_nodes :: NoOp.t | Num.t | Type.t | Var.t
