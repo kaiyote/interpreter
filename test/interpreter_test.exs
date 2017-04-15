@@ -31,4 +31,17 @@ defmodule InterpreterTest do
     results = Interpreter.interpret test_prog
     assert results == [{"a", 2}, {"b", 25}, {"c", 27}, {"number", 2}, {"x", 11}, {"y", 5.997142857142857}]
   end
+
+  test "Interpreter can correctly catch a NameError" do
+    test_prog = "
+    PROGRAM NameError;
+    VAR
+        b : INTEGER;
+    BEGIN
+        b := 1;
+        a := b + 2;
+    END.
+    "
+    assert_raise RuntimeError, "NameError(a)", fn -> Interpreter.interpret(test_prog) end
+  end
 end

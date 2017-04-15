@@ -2,7 +2,9 @@ defmodule Interpreter.SymbolTable do
   @moduledoc "The symbol table"
 
   alias Interpreter.Symbol
-  alias Interpreter.Symbol.BuiltInType
+  alias Interpreter.Symbol.{BuiltInType, Var}
+  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, UnaryOp, VarDecl}
+  alias Interpreter.Node.Var, as: NVar
 
   @ets_table :interpreter_symbol_table
 
@@ -41,5 +43,46 @@ defmodule Interpreter.SymbolTable do
       [{^name, value}] -> value
       _ -> nil
     end
+  end
+
+  @doc "Walks the Symbol tree, ensuring variables exist before assignment"
+  def visit(%Assign{ident: %{name: name}, value: value}) do
+    case lookup name do
+      nil -> raise "NameError(#{name})"
+      _ -> visit value
+    end
+  end
+  def visit(%BinOp{left: left, right: right}) do
+    visit left
+    visit right
+  end
+  def visit(%Block{declarations: declarations, compound_statement: statements}) do
+    for decl <- declarations, do: visit(decl)
+    visit statements
+  end
+  def visit(%Compound{children: children}) do
+    for child <- children, do: visit(child)
+  end
+  def visit(%NVar{name: name}) do
+    case lookup name do
+      nil -> raise "NameError(#{name})"
+      _ -> :ok
+    end
+  end
+  def visit(%Program{block: block}) do
+    true = new()
+    visit block
+  end
+  def visit(%UnaryOp{expr: expr}) do
+    visit expr
+  end
+  def visit(%VarDecl{type: %{value: t_val}, var: %{name: name}}) do
+    type_symbol = lookup t_val
+    var_symbol = %Var{name: name, type: type_symbol}
+    define(var_symbol)
+  end
+  def visit(%Num{}) do
+  end
+  def visit(%NoOp{}) do
   end
 end

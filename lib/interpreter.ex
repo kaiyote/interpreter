@@ -1,7 +1,7 @@
 defmodule Interpreter do
   @moduledoc "The main module. Pass a string to `Interpreter.interpret` to get the result"
 
-  alias Interpreter.{Parser, Node}
+  alias Interpreter.{Parser, Node, SymbolTable}
   alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, Type, UnaryOp, Var,
                           VarDecl}
 
@@ -16,9 +16,9 @@ defmodule Interpreter do
       :ets.new @ets_table, [:ordered_set, :public, :named_table]
     end
 
-    input
-    |> Parser.parse()
-    |> visit()
+    tree = Parser.parse input
+    SymbolTable.visit tree
+    visit tree
 
     :ets.select @ets_table, [{:"$1", [], [:"$1"]}]
   end

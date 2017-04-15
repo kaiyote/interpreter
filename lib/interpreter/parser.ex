@@ -2,7 +2,8 @@ defmodule Interpreter.Parser do
   @moduledoc "The `Parser`. Turns a source string into an `Abstract Syntax Tree`"
 
   alias Interpreter.{Token, Lexer, Node}
-  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, Type, UnaryOp, Var, VarDecl}
+  alias Interpreter.Node.{Assign, BinOp, Block, Compound, NoOp, Num, Program, Type, UnaryOp, Var,
+                          VarDecl}
 
   @typedoc "The `Parser` Struct"
   @type t :: %__MODULE__{
@@ -37,7 +38,7 @@ defmodule Interpreter.Parser do
     %{parser | lexer: lexer, current_token: token}
   end
 
-  @spec finish_parse(t, Compound.t) :: Compound.t
+  @spec finish_parse(t, Program.t) :: Program.t
   defp finish_parse(%{current_token: %{type: type}}, tree) when type == :eof do
     tree
   end
